@@ -32,10 +32,10 @@ SQL_INTERP = re.compile(
 DANGEROUS = [
     (re.compile(r"\beval\s*\("), "eval() on dynamic input"),
     (re.compile(r"\bexec\s*\("), "exec() on dynamic input"),
-    (re.compile(r"\bpickle\.loads?\s*\("), "pickle can execute code from untrusted data"),
+    (re.compile(r"\bpickle\.loads?\s*\("), "pickle.load, which can run code hidden in the data"),
     (re.compile(r"\byaml\.load\s*\((?![^)]*Loader\s*=\s*yaml\.SafeLoader)"), "yaml.load without SafeLoader"),
     (re.compile(r"\bshell\s*=\s*True\b"), "subprocess with shell=True"),
-    (re.compile(r"\bverify\s*=\s*False\b"), "TLS verification disabled"),
+    (re.compile(r"\bverify\s*=\s*False\b"), "verify=False, which turns off TLS certificate checks"),
 ]
 INJECTION = re.compile(
     r"(?i)(ignore (all |any |your |the )?(previous|prior|above) (instructions|rules)|"
@@ -97,7 +97,7 @@ def run_rules(files: Iterable[FileDiff], large_change_lines: int = 400) -> list[
                             line=ln.number,
                             severity="medium",
                             category="dangerous_call",
-                            title=why[0].upper() + why[1:],
+                            title=why if not why.split()[0].isalpha() else why[0].upper() + why[1:],  # keep code like yaml.load as written
                             explanation=f"This line uses {why}.",
                             suggestion="Use a safe alternative or justify it in a comment.",
                             source="rule",
