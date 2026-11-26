@@ -2,6 +2,8 @@
 
 An AI pull request reviewer that runs as a GitHub Action. Deterministic rules catch what patterns can see: secrets, SQL built from strings, unsafe calls, code changed without tests. An optional Amazon Bedrock model reviews each file for what patterns can't see: off-by-one errors, swallowed exceptions, missing timeouts. Every model finding is validated before it's posted. The agent only comments. It can't approve, request changes or merge.
 
+**Live example:** [PR #1](https://github.com/mrodavis/pr-review-agent/pull/1) adds a deliberately flawed file. The action reviewed it in rules mode and posted 7 line comments plus a summary, including one on a code comment telling the AI reviewer to approve. Re-running the job posted nothing new, because that commit was already reviewed.
+
 ## How a review runs
 
 ```
