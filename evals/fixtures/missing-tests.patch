@@ -1,0 +1,17 @@
+diff --git a/src/billing/discounts.py b/src/billing/discounts.py
+index 5e6f7a8..9b0c1d2 100644
+--- a/src/billing/discounts.py
++++ b/src/billing/discounts.py
+@@ -20,3 +20,12 @@ def loyalty_discount(years: int) -> float:
+     if years >= 5:
+         return 0.10
+     return 0.0
++
++
++def bundle_discount(items: list[str]) -> float:
++    """Ten percent off when a cart has three or more distinct items."""
++    distinct = set(items)
++    if len(distinct) >= 3:
++        return 0.10
++    return 0.0
++

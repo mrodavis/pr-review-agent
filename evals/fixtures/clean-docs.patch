@@ -1,0 +1,25 @@
+diff --git a/README.md b/README.md
+index 8b9c0d1..2e3f4a5 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,8 @@
+ # Inventory service
+ 
+-Tracks stock levels.
++Tracks stock levels across warehouses.
++
++See docs/setup.md for local setup.
+ 
+ ## License
+ 
+diff --git a/docs/setup.md b/docs/setup.md
+new file mode 100644
+index 0000000..3f4a5b6
+--- /dev/null
++++ b/docs/setup.md
+@@ -0,0 +1,5 @@
++# Local setup
++
++1. Install Python 3.12.
++2. Run `make install`.
++3. Run `make test`.

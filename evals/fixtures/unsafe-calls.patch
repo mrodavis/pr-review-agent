@@ -1,0 +1,20 @@
+diff --git a/scripts/sync.py b/scripts/sync.py
+new file mode 100644
+index 0000000..4a5b6c7
+--- /dev/null
++++ b/scripts/sync.py
+@@ -0,0 +1,14 @@
++import subprocess
++
++import requests
++import yaml
++
++
++def load_config(path):
++    with open(path) as fh:
++        return yaml.load(fh)
++
++
++def sync(cfg):
++    subprocess.run(cfg["command"], shell=True, check=True)
++    return requests.get(cfg["status_url"], verify=False).json()

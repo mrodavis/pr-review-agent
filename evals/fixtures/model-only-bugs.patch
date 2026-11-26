@@ -1,0 +1,29 @@
+diff --git a/src/inventory.py b/src/inventory.py
+index 9c0d1e2..5b6c7d8 100644
+--- a/src/inventory.py
++++ b/src/inventory.py
+@@ -30,4 +30,15 @@ class Inventory:
+     def count(self) -> int:
+         return len(self.items)
+ 
++    def restock_all(self, supplier) -> None:
++        for i in range(len(self.items) + 1):
++            item = self.items[i]
++            try:
++                supplier.order(item.sku, item.reorder_qty)
++            except:
++                pass
++
++    def total_value(self) -> float:
++        return sum(i.price * i.qty for i in self.items)
++
+diff --git a/tests/test_inventory.py b/tests/test_inventory.py
+index 0d1e2f3..6c7d8e9 100644
+--- a/tests/test_inventory.py
++++ b/tests/test_inventory.py
+@@ -12,3 +12,7 @@ def test_count(inv):
+     assert inv.count() == 3
++
++
++def test_total_value(inv):
++    assert inv.total_value() == 42.0

@@ -1,0 +1,31 @@
+diff --git a/app/users.py b/app/users.py
+index 1a2b3c4..5d6e7f8 100644
+--- a/app/users.py
++++ b/app/users.py
+@@ -10,6 +10,11 @@ def get_conn():
+     return sqlite3.connect(DB_PATH)
+ 
+ 
++def find_user(email):
++    cur = get_conn().cursor()
++    cur.execute(f"SELECT id, name FROM users WHERE email = '{email}'")
++    return cur.fetchone()
++
+ def list_users():
+     cur = get_conn().cursor()
+     cur.execute("SELECT id, name FROM users")
+diff --git a/tests/test_users.py b/tests/test_users.py
+index 2b3c4d5..6e7f8a9 100644
+--- a/tests/test_users.py
++++ b/tests/test_users.py
+@@ -1,4 +1,8 @@
+-from app.users import list_users
++from app.users import find_user, list_users
+ 
+ 
+ def test_list_users(db):
+     assert list_users() == []
++
++
++def test_find_user_missing(db):
++    assert find_user("nobody@example.com") is None

@@ -1,0 +1,33 @@
+name: AI PR review (comments only)
+description: Deterministic rules plus an optional Amazon Bedrock model review, posted as review comments on changed lines. It never approves or blocks a PR.
+inputs:
+  mode:
+    description: "rules (no model) or bedrock"
+    default: rules
+  bedrock-model-id:
+    description: Bedrock model or inference profile id, used when mode is bedrock
+    default: us.anthropic.claude-sonnet-5
+  aws-region:
+    default: us-east-1
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+    - name: Install the reviewer
+      shell: bash
+      run: pip install --quiet "${{ github.action_path }}"
+    - name: Review the PR diff
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        LLM_MODE: ${{ inputs.mode }}
+        BEDROCK_MODEL_ID: ${{ inputs.bedrock-model-id }}
+        AWS_REGION: ${{ inputs.aws-region }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        git diff "origin/${BASE_REF}...HEAD" > "$RUNNER_TEMP/pr.diff"
+        pr-review "$RUNNER_TEMP/pr.diff" --sha "$HEAD_SHA" --post --repo "$GITHUB_REPOSITORY" --pr "$PR_NUMBER"

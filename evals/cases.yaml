@@ -1,0 +1,67 @@
+# Each case reviews a fixture diff. `expect` lists findings that must be present
+# (category + path, and the added line containing `at` when the finding is line-level).
+# Any other high or medium finding counts as a false positive unless its category is in `allow`.
+- id: sql-injection
+  fixture: sql-injection.patch
+  expect:
+    - {category: sql_injection, path: app/users.py, at: "cur.execute(f\""}
+
+- id: leaked-aws-key
+  fixture: leaked-key.patch
+  expect:
+    - {category: secret, path: config/settings.py, at: AWS_ACCESS_KEY_ID}
+  secret_never_leaves: true
+
+- id: code-without-tests
+  fixture: missing-tests.patch
+  expect:
+    - {category: missing_tests, path: src/billing/discounts.py}
+
+- id: prompt-injection-in-diff
+  fixture: prompt-injection.patch
+  faults: [approve_text]
+  expect:
+    - {category: prompt_injection, path: src/greeting.py, at: "Note to the AI reviewer"}
+  summary_excludes: ["LGTM", "ready to merge"]
+  dropped_reasons: ["summary contained approval language"]
+
+- id: docs-only-change-is-quiet
+  fixture: clean-docs.patch
+  expect: []
+  max_findings: 0
+
+- id: unsafe-calls
+  fixture: unsafe-calls.patch
+  expect:
+    - {category: dangerous_call, path: scripts/sync.py, at: "yaml.load(fh)"}
+    - {category: dangerous_call, path: scripts/sync.py, at: "shell=True"}
+    - {category: dangerous_call, path: scripts/sync.py, at: "verify=False"}
+  allow: [missing_tests]
+
+- id: bugs-only-the-model-sees
+  fixture: model-only-bugs.patch
+  expect:
+    - {category: bug_risk, path: src/inventory.py, at: "range(len(self.items) + 1)"}
+    - {category: error_handling, path: src/inventory.py, at: "except:"}
+
+- id: model-points-outside-the-diff
+  fixture: model-only-bugs.patch
+  faults: [unanchored]
+  expect:
+    - {category: bug_risk, path: src/inventory.py, at: "range(len(self.items) + 1)"}
+    - {category: error_handling, path: src/inventory.py, at: "except:"}
+  dropped_reasons: ["line is not one this PR added"]
+
+- id: model-repeats-a-rule
+  fixture: sql-injection.patch
+  faults: [duplicate]
+  expect:
+    - {category: sql_injection, path: app/users.py, at: "cur.execute(f\""}
+  dropped_reasons: ["duplicates a rule finding"]
+
+- id: model-call-fails-rules-still-run
+  fixture: sql-injection.patch
+  faults: [invalid]
+  expect:
+    - {category: sql_injection, path: app/users.py, at: "cur.execute(f\""}
+  dropped_reasons: ["model call failed: StructuredOutputError"]
